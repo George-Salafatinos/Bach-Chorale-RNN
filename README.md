@@ -16,7 +16,7 @@ The dataset consists of chorales composed by Johann Sebastian Bach from this Kag
   1. The original dataset (no augmentation)
   2. All chorales transposed to C major/A minor
   3. Chorales in C, G, and F major with tempo variations
-  4. Chorales transposed to all 12 keys
+  4. Chorales transposed to all 12 keys with tempo variations
 - **LSTM Model**: Train a sequence-to-sequence LSTM model to predict the next chord
 - **Chorale Generation**: Generate new Bach-style chorales from trained models
 - **MIDI Conversion**: Convert generated chorales to MIDI files for playback
