@@ -4,7 +4,7 @@ This project implements a deep learning model to generate Bach-style chorales us
 
 ## Dataset
 
-The dataset consists of chorales composed by Johann Sebastian Bach, represented as piano note indices:
+The dataset consists of chorales composed by Johann Sebastian Bach from this Kaggle dataset https://www.kaggle.com/datasets/pranjalsriv/bach-chorales-2/data, represented as piano note indices:
 - Each chorale is 100 to 640 time steps long
 - Each time step contains 4 integers representing the notes played by the four voices (soprano, alto, tenor, bass)
 - The dataset includes 382 chorales (229 training, 76 validation, 77 test)
@@ -129,19 +129,3 @@ The project compares the performance of models trained on different augmentation
 | 4 | All 12 keys | 2,748 chorales | - | - |
 
 *Note: Fill in the results after training the models*
-
-## Future Work
-
-- Implement a transformer-based model for comparison
-- Add voice-leading rules as constraints during generation
-- Create a web interface for interactive chorale generation
-- Explore more sophisticated augmentation techniques based on music theory
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- The dataset is based on the work of Johann Sebastian Bach
-- Inspired by the research in deep learning for music generation
