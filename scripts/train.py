@@ -42,10 +42,6 @@ def parse_args():
                         help='Dropout rate for regularization')
     parser.add_argument('--early_stopping', type=int, default=10,
                         help='Number of epochs with no improvement after which to stop')
-    parser.add_argument('--use_gpu', action='store_true', 
-                        help='Force use of GPU if available')
-    parser.add_argument('--mixed_precision', action='store_true',
-                        help='Use mixed precision training for faster GPU training')
     
     return parser.parse_args()
 
@@ -64,26 +60,6 @@ def main():
     # Set random seeds for reproducibility
     np.random.seed(42)
     tf.random.set_seed(42)
-    
-    # Configure GPU if requested
-    if args.use_gpu:
-        gpus = tf.config.experimental.list_physical_devices('GPU')
-        if gpus:
-            try:
-                # Set memory growth to avoid allocating all GPU memory at once
-                for gpu in gpus:
-                    tf.config.experimental.set_memory_growth(gpu, True)
-                print(f"GPU configuration successful. Found {len(gpus)} GPU(s).")
-                
-                # Enable mixed precision training if requested
-                if args.mixed_precision:
-                    tf.keras.mixed_precision.set_global_policy('mixed_float16')
-                    print("Mixed precision training enabled.")
-                
-            except RuntimeError as e:
-                print(f"GPU configuration failed: {e}")
-        else:
-            print("No GPU found. Using CPU for computation.")
     
     # Load data
     print(f"Loading data from {args.data_dir}...")

@@ -3,35 +3,8 @@ LSTM model for Bach chorales generation.
 """
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras import layers, models, mixed_precision
+from tensorflow.keras import layers, models
 from typing import Tuple, Dict, Optional
-
-
-# Configure GPU for performance
-def configure_gpu():
-    """Configure GPU for optimal performance."""
-    gpus = tf.config.experimental.list_physical_devices('GPU')
-    if gpus:
-        try:
-            # Set memory growth to avoid allocating all GPU memory at once
-            for gpu in gpus:
-                tf.config.experimental.set_memory_growth(gpu, True)
-            
-            print(f"GPU configuration successful. Found {len(gpus)} GPU(s).")
-            
-            # Enable mixed precision training
-            mixed_precision.set_global_policy('mixed_float16')
-            print("Mixed precision training enabled.")
-            return True
-        except RuntimeError as e:
-            print(f"GPU configuration failed: {e}")
-    else:
-        print("No GPU found. Using CPU for computation.")
-    return False
-
-
-# Try to configure GPU
-has_gpu = configure_gpu()
 
 
 class BachChoraleLSTM:
@@ -98,11 +71,15 @@ class BachChoraleLSTM:
         # Create model
         model = models.Model(inputs=input_layer, outputs=voice_outputs)
         
-        # Compile model
+        # Compile model with unique metric names
+        metrics_dict = {}
+        for i in range(self.input_shape[1]):
+            metrics_dict[f'voice_{i}'] = [tf.keras.metrics.SparseCategoricalAccuracy(name=f'voice_{i}_accuracy')]
+            
         model.compile(
             optimizer='adam',
             loss=['sparse_categorical_crossentropy'] * self.input_shape[1],
-            metrics=['accuracy'] * self.input_shape[1]
+            metrics=metrics_dict
         )
         
         return model
@@ -138,33 +115,13 @@ class BachChoraleLSTM:
             y_val_voices = [y_val[:, i] for i in range(y_val.shape[1])]
             validation_data = (X_val, y_val_voices)
         
-        # Create dataset for faster data loading
-        train_dataset = tf.data.Dataset.from_tensor_slices((X_train, tuple(y_train_voices)))
-        train_dataset = train_dataset.shuffle(buffer_size=10000)
-        train_dataset = train_dataset.batch(batch_size)
-        train_dataset = train_dataset.prefetch(tf.data.AUTOTUNE)
-        
-        if validation_data:
-            val_dataset = tf.data.Dataset.from_tensor_slices((X_val, tuple(y_val_voices)))
-            val_dataset = val_dataset.batch(batch_size)
-            val_dataset = val_dataset.prefetch(tf.data.AUTOTUNE)
-            validation_data = val_dataset
-        
-        # Add TensorBoard profiler callback if GPU is available
-        if has_gpu and callbacks is not None:
-            # Add TensorFlow profiler
-            callbacks.append(
-                tf.keras.callbacks.TensorBoard(
-                    profile_batch='500,520'  # Profile from batches 500 to 520
-                )
-            )
-        
         history = self.model.fit(
-            train_dataset,
+            X_train, 
+            y_train_voices,
+            batch_size=batch_size,
             epochs=epochs,
             validation_data=validation_data,
-            callbacks=callbacks,
-            verbose=1
+            callbacks=callbacks
         )
         
         return history.history
